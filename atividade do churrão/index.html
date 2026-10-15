@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Meteorológico Profissional</title>
+
+    <!-- Bibliotecas externas -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   
+    <!-- Ícones Feather -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="light-mode">
+    <!-- CABEÇALHO -->
+    <header class="main-header">
+      <div class="header-content">
+        <h1><i data-feather="cloud-rain"></i> WeatherDash 4.0</h1>
+        <div class="header-actions">
+          <button id="toggleTheme" class="btn-icon" aria-label="Alternar tema claro/escuro" title="Alternar Tema">
+            <i data-feather="moon" id="themeIcon"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- PAINEL DE CONTROLE / PESQUISA -->
+      <section class="card search-card" aria-labelledby="search-heading">
+        <h2 id="search-heading" class="sr-only">Consulta Climática</h2>
+       
+        <form id="searchForm" class="row-form" onsubmit="return false;">
+          <div class="input-group">
+            <label for="cidade">Cidade:</label>
+            <input
+              id="cidade"
+              type="text"
+              placeholder="Ex.: São Paulo"
+              aria-required="true"
+            />
+          </div>
+
+          <div class="input-group">
+            <label for="pais">País:</label>
+            <select id="pais" aria-label="Selecione o País">
+              <option value="BR">Brasil (BR)</option>
+              <option value="US">Estados Unidos (US)</option>
+              <option value="PT">Portugal (PT)</option>
+              <option value="AR">Argentina (AR)</option>
+              <option value="CL">Chile (CL)</option>
+            </select>
+          </div>
+
+          <button id="aplicar" type="button" class="btn-primary">
+            <i data-feather="search"></i> Consultar
+          </button>
+
+          <button id="btnFavorito" type="button" class="btn-secondary" title="Salvar como favorita">
+            <i data-feather="star"></i> Favoritar
+          </button>
+        </form>
+
+        <!-- Indicador de carregamento & Mensagens de Status -->
+        <div id="loading" class="loading-spinner hidden" aria-live="polite">
+          <div class="spinner"></div>
+          <span>Consultando dados meteorológicos...</span>
+        </div>
+        <div id="mensagem" aria-live="assertive" role="status"></div>
+
+        <div class="status-bar">
+          <span class="pill">Cidade Atual: <b id="cidadeAtual">—</b></span>
+          <span class="pill">Última Atualização: <b id="lastUpdate">—</b></span>
+          <span class="pill">MQTT: <b id="mqttStatus" class="status-offline">Desconectado</b></span>
+        </div>
+      </section>
+
+      <!-- NOVO RECURSO: ALERTA CLIMÁTICO (OPÇÃO B - FUNCIONALIDADE PRÓPRIA) -->
+      <div id="weatherAlert" class="alert-box hidden" role="alert"></div>
+
+      <!-- CARDS METEOROLÓGICOS (3+ NOVAS INFORMAÇÕES DA API) -->
+      <section class="grid-cards" aria-label="Indicadores Meteorológicos">
+        <article class="card metric-card">
+          <div class="card-icon"><i data-feather="thermometer"></i></div>
+          <div class="card-info">
+            <h3>Temperatura</h3>
+            <p id="temp" class="metric-value">-- °C</p>
+            <small>Sensação: <span id="feelsLike">-- °C</span></small>
+          </div>
+        </article>
+
+        <article class="card metric-card">
+          <div class="card-icon"><i data-feather="droplet"></i></div>
+          <div class="card-info">
+            <h3>Umidade</h3>
+            <p id="hum" class="metric-value">-- %</p>
+            <small>Pressão: <span id="pressure">-- hPa</span></small>
+          </div>
+        </article>
+
+        <article class="card metric-card">
+          <div class="card-icon"><i data-feather="wind"></i></div>
+          <div class="card-info">
+            <h3>Vento</h3>
+            <p id="windSpeed" class="metric-value">-- km/h</p>
+            <small>Condição: <span id="weatherDesc">--</span></small>
+          </div>
+        </article>
+
+        <article class="card metric-card">
+          <div class="card-icon"><i data-feather="sun"></i></div>
+          <div class="card-info">
+            <h3>Sol</h3>
+            <p class="sun-times">
+              🌅 <span id="sunrise">--:--</span> | 🌇 <span id="sunset">--:--</span>
+            </p>
+            <small>Mín / Máx: <span id="tempMinMax">-- / --</span></small>
+          </div>
+        </article>
+      </section>
+
+      <!-- GRÁFICOS MELHORADOS -->
+      <section class="card">
+        <h2><i data-feather="bar-chart-2"></i> Histórico em Gráfico (Tempo Real)</h2>
+        <div class="chart-container">
+          <canvas id="chart"></canvas>
+        </div>
+      </section>
+
+      <!-- HISTÓRICO E FAVORITOS -->
+      <div class="grid-two-columns">
+        <section class="card">
+          <h2><i data-feather="clock"></i> Histórico de Consultas</h2>
+          <ul id="listaHistorico" class="list-container"></ul>
+        </section>
+
+        <section class="card">
+          <h2><i data-feather="star"></i> Cidades Favoritas</h2>
+          <div id="cidadeFavoritaContainer" class="list-container">
+            <p id="favEmptyMsg">Nenhuma cidade favoritada.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="main-footer">
+      <p>João Otávio &copy; 2026</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
